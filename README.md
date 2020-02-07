@@ -34,6 +34,9 @@ if you wants to use local build image, command should be use -P bmcmonitor ,
 ex:
 $ docker run -d --privileged=true --name ampere -v /work:/work2 -p 3005:3000 -p 9095:9090 -P richliu/bmcmonitor
 
+Configure docker start this container after reboot
+$ docker update --restart=unless-stopped ampere
+
 # Change data source 
 
 bmcmonitor uses telegraf to fetch all Ampere BMC's information , there are some default server but may not fit your
