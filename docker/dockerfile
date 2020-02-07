@@ -9,9 +9,8 @@ RUN export DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y tzdata
 RUN ln -fs /usr/share/zoneinfo/Asia/Taiwan /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
-RUN apt -y install vim tmux lftp net-tools ethtool bc sudo wget
+RUN apt -y install vim net-tools wget
 RUN apt -y upgrade
-RUN apt autoclean
 
 # Download Telegraf
 RUN mkdir -p /work/output
@@ -28,10 +27,13 @@ RUN wget https://github.com/prometheus/prometheus/releases/download/v2.15.2/prom
 RUN tar xvf prometheus-2.15.2.linux-arm64.tar.gz
 ADD prometheus.yml /work/prometheus-2.15.2.linux-arm64/prometheus.yml
 
-# Download 
-RUN sudo apt-get install -y adduser libfontconfig1
+# Download  grafana
+RUN apt-get install -y adduser libfontconfig1
 RUN wget https://dl.grafana.com/oss/release/grafana_6.6.0_arm64.deb
 RUN dpkg -i grafana_6.6.0_arm64.deb
+RUN grafana-cli plugins install briangann-gauge-panel
+RUN apt autoclean
+RUN apt clean
 
 RUN echo 'root:root' |chpasswd # echo password | passwd --stdin root
 RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
@@ -40,6 +42,7 @@ RUN echo "export VISIBLE=now" >> /etc/profile
 RUN sed -i "s/UsePAM yes/UsePAM no/" /etc/ssh/sshd_config
 
 ADD service.sh /root/service.sh
+ADD checkwizzy.sh /work/checkwizzy.sh
 
 EXPOSE 22
 CMD bash /root/service.sh; /usr/sbin/sshd -D
